@@ -1,0 +1,32 @@
+plugins {
+	id 'org.springframework.boot' version '2.2.4.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'war'
+}
+
+group = 'de.larsgrefer'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+}
+
+task explodedBootWar(type: Sync) {
+	dependsOn bootWar
+
+	from(zipTree(bootWar.archiveFile))
+	into("build/exploded")
+}
+
+task triggerBug(type: Exec) {
+	dependsOn explodedBootWar
+
+	workingDir(file("build/exploded"))
+
+	commandLine("java", "-classpath", project.fileTree("lib").asPath + ":.", "org.springframework.boot.loader.WarLauncher")
+}
