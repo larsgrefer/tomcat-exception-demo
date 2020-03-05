@@ -16,17 +16,19 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 }
 
+def targetDir = file("build/exploded")
+
 task explodedBootWar(type: Sync) {
 	dependsOn bootWar
 
 	from(zipTree(bootWar.archiveFile))
-	into("build/exploded")
+	into(targetDir)
 }
 
 task triggerBug(type: Exec) {
 	dependsOn explodedBootWar
 
-	workingDir(file("build/exploded"))
+	workingDir(targetDir)
 
 	commandLine("java", "-classpath", project.fileTree("lib").asPath + ":.", "org.springframework.boot.loader.WarLauncher")
 }
